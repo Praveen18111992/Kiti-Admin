@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Kiti Admin</string>
+    <string name="earning_format">\u20B9 %d</string>
+</resources>
