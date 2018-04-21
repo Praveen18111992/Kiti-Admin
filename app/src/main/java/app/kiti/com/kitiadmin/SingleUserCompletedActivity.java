@@ -1,8 +1,10 @@
 package app.kiti.com.kitiadmin;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -19,6 +21,8 @@ public class SingleUserCompletedActivity extends AppCompatActivity {
 
     @BindView(R.id.transactions_listView)
     ListView transactionsListView;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
     private SyncManager syncManager;
     private CompletedTransactionListAdapter completedListAdapter;
     private String userPhone;
@@ -42,6 +46,10 @@ public class SingleUserCompletedActivity extends AppCompatActivity {
 
     private void fetchCompletedTransaction() {
 
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
         syncManager.getCompletedRequestNode(userPhone).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -62,24 +70,30 @@ public class SingleUserCompletedActivity extends AppCompatActivity {
 
         ArrayList<CompletedRequestModel> completedRequestModels = new ArrayList<>();
 
-        for (Map.Entry<String, Object> entry : completedTransaction.entrySet()) {
-            //set map
-            Map map = (Map) entry.getValue();
+        if (completedRequestModels != null) {
+            for (Map.Entry<String, Object> entry : completedTransaction.entrySet()) {
+                //set map
+                Map map = (Map) entry.getValue();
 
-            CompletedRequestModel redeemRequestModels = new CompletedRequestModel(
-                    (long) map.get(FirebaseDataField.AMOUNT),
-                    (String) map.get(FirebaseDataField.COMPLETED_AT),
-                    (String) map.get(FirebaseDataField.COMPLETED_VIA),
-                    (String) map.get(FirebaseDataField.COMPLETED_ON_NUMBER),
-                    (String) map.get(FirebaseDataField.REQUEST_ID),
-                    (String) map.get(FirebaseDataField.TRANSACTION_ID)
-            );
-            completedRequestModels.add(redeemRequestModels);
+                CompletedRequestModel redeemRequestModels = new CompletedRequestModel(
+                        (long) map.get(FirebaseDataField.AMOUNT),
+                        (String) map.get(FirebaseDataField.COMPLETED_AT),
+                        (String) map.get(FirebaseDataField.COMPLETED_VIA),
+                        (String) map.get(FirebaseDataField.COMPLETED_ON_NUMBER),
+                        (String) map.get(FirebaseDataField.REQUEST_ID),
+                        (String) map.get(FirebaseDataField.TRANSACTION_ID)
+                );
+                completedRequestModels.add(redeemRequestModels);
 
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+
+            }
+            setRedeemRequestList(completedRequestModels);
+        }else{
+            setRedeemRequestList(new ArrayList<CompletedRequestModel>());
         }
-
-        setRedeemRequestList(completedRequestModels);
-
     }
 
     private void setRedeemRequestList(ArrayList<CompletedRequestModel> redeemRequestModels) {

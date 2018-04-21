@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,6 +32,8 @@ public class CompletedFragment extends Fragment {
 
     @BindView(R.id.pending_list)
     ListView pendingList;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
     private Context mContext;
     private Unbinder unbinder;
     SyncManager syncManager;
@@ -75,6 +78,10 @@ public class CompletedFragment extends Fragment {
 
     private void fetchPendingList() {
 
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
         syncManager.getCompletedNodeRef()
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -100,10 +107,12 @@ public class CompletedFragment extends Fragment {
             }
         }
         this.mCompletedList = phones;
-        if(pendingList!=null) {
+        if (progressBar != null) {
+            progressBar.setVisibility(View.GONE);
+        }
+        if (pendingList != null) {
             pendingList.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, phones));
         }
-
     }
 
     @Override

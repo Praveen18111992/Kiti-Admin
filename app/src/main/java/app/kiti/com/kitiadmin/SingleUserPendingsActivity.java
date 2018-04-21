@@ -1,12 +1,11 @@
 package app.kiti.com.kitiadmin;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -25,6 +24,8 @@ public class SingleUserPendingsActivity extends AppCompatActivity implements Pen
 
     @BindView(R.id.transactions_listView)
     ListView transactionsListView;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
     private SyncManager syncManager;
     private PendingTransactionListAdapter pendingTransactionListAdapter;
     private String userPhone;
@@ -50,6 +51,10 @@ public class SingleUserPendingsActivity extends AppCompatActivity implements Pen
 
     private void fetchRequestedTransaction() {
 
+        if(progressBar!=null){
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
         syncManager.getPendingRequestNode(userPhone).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -69,24 +74,29 @@ public class SingleUserPendingsActivity extends AppCompatActivity implements Pen
     private void collectPendingTransaction(Map<String, Object> pendingTransaction) {
 
         ArrayList<RedeemRequestModel> redeemRequestModels = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : pendingTransaction.entrySet()) {
-            //set map
-            Map map = (Map) entry.getValue();
+        if(pendingTransaction!=null) {
+            for (Map.Entry<String, Object> entry : pendingTransaction.entrySet()) {
+                //set map
+                Map map = (Map) entry.getValue();
 
-            RedeemRequestModel redeemRequestModel = new RedeemRequestModel(
-                    (long) map.get(FirebaseDataField.AMOUNT),
-                    (String) map.get(FirebaseDataField.REQUEST_ID),
-                    (String) map.get(FirebaseDataField.REQUESTED_AT),
-                    (String) map.get(FirebaseDataField.REQUESTED_VIA),
-                    (String) map.get(FirebaseDataField.REQUESTED_ON_NUMBER)
-            );
+                RedeemRequestModel redeemRequestModel = new RedeemRequestModel(
+                        (long) map.get(FirebaseDataField.AMOUNT),
+                        (String) map.get(FirebaseDataField.REQUEST_ID),
+                        (String) map.get(FirebaseDataField.REQUESTED_AT),
+                        (String) map.get(FirebaseDataField.REQUESTED_VIA),
+                        (String) map.get(FirebaseDataField.REQUESTED_ON_NUMBER)
+                );
 
-            redeemRequestModels.add(redeemRequestModel);
+                redeemRequestModels.add(redeemRequestModel);
 
+            }
+            if(progressBar!=null){
+                progressBar.setVisibility(View.GONE);
+            }
+            setRedeemRequestList(redeemRequestModels);
+        }else{
+            setRedeemRequestList(new ArrayList<RedeemRequestModel>());
         }
-
-        setRedeemRequestList(redeemRequestModels);
-
     }
 
     private void setRedeemRequestList(ArrayList<RedeemRequestModel> redeemRequestModels) {
